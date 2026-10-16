@@ -1,50 +1,95 @@
-# FunkoApp — Práctica 3: API REST de Funkos
+# FunkoApp — Parte 1: API REST con SQL
 
-Proyecto de la asignatura **Desarrollo Web en Entorno Servidor** para construir y evolucionar una API REST de gestión de Funkos con ASP.NET Core.
+Primera parte de la Práctica de Desarrollo Web en Entorno Servidor. Su objetivo es construir una **API REST de Funkos** con ASP.NET Core, controladores MVC y persistencia SQL mediante Entity Framework Core.
 
-El desarrollo se divide en **dos partes**, cada una conservada en una rama de Git. La segunda partirá del código terminado en la primera y lo refactorizará para utilizar otra base de datos y otro modelo de relaciones.
 
-## Organización de ramas
+## Funcionalidades previstas
 
-| Rama | Propósito |
+### Funkos
+
+- Listar todos los Funkos y consultar uno por su identificador.
+- Buscar Funkos por nombre mediante un parámetro de consulta.
+- Crear y actualizar Funkos.
+- Eliminar Funkos de forma lógica mediante `IsDeleted`.
+
+Cada Funko tendrá, como mínimo: `Id`, `Nombre`, `Precio`, `Stock`, `CategoriaId`, `Categoria`, `IsDeleted`, `CreatedAt` y `UpdatedAt`.
+
+### Categorías
+
+- Listar todas las categorías y consultar una por su identificador.
+- Cargar las categorías iniciales mediante **semillas** (*seed data*).
+- No se expondrán operaciones POST, PUT ni DELETE para categorías en esta parte.
+
+## Relación entre entidades
+
+La relación entre **Funko** y **Categoria** es **uno a muchos (1:N)**:
+
+- Un Funko pertenece a **una categoría**.
+- Una categoría puede estar asociada a **muchos Funkos**.
+- `Funko` guarda `CategoriaId` (clave foránea) y la referencia `Categoria`.
+- `Categoria` puede incluir la colección de Funkos asociados.
+
+Esta relación se configurará en el `DbContext` utilizando **Fluent API**, siguiendo el ejemplo `Producto`–`Categoria` de `TiendaDawApi-NetCore`.
+
+## Endpoints previstos
+
+| Método | Ruta | Operación | Éxito |
+| --- | --- | --- | --- |
+| `GET` | `/api/funkos` | Listar Funkos | `200 OK` |
+| `GET` | `/api/funkos/{id}` | Obtener un Funko | `200 OK` |
+| `GET` | `/api/funkos?nombre=...` | Buscar por nombre | `200 OK` |
+| `POST` | `/api/funkos` | Crear un Funko | `201 Created` |
+| `PUT` | `/api/funkos/{id}` | Actualizar un Funko completo | `200 OK` |
+| `DELETE` | `/api/funkos/{id}` | Borrado lógico de un Funko | `204 No Content` |
+| `GET` | `/api/categorias` | Listar categorías | `200 OK` |
+| `GET` | `/api/categorias/{id}` | Obtener una categoría | `200 OK` |
+
+Además de las respuestas de éxito, se contemplarán errores de validación, recursos no encontrados y conflictos de negocio, utilizando los códigos HTTP correspondientes.
+
+## Tecnologías y patrones previstos
+
+| Tecnología / patrón | Uso |
 | --- | --- |
-| `main` | Documentación general y punto de partida del repositorio. |
-| `v-Sql` | API de Funkos con base de datos SQL, Entity Framework Core y relación con categorías. |
-| `v-Mongo` | Evolución de la primera parte: MongoDB, categorías embebidas, proveedores referenciados y dos repositorios intercambiables. |
+| ASP.NET Core / C# 14 | Desarrollo de la API con controladores MVC. |
+| Entity Framework Core | Persistencia en PostgreSQL. |
+| Fluent API | Relaciones, claves, restricciones y configuración del modelo. |
+| Migraciones y semillas | Crear y evolucionar el esquema, e insertar categorías iniciales. |
+| Scrutor | Registrar servicios y repositorios mediante inyección de dependencias. |
+| CSharpFunctionalExtensions (`Result`) | Gestionar resultados y errores de negocio mediante ROP. |
+| DTOs y mapeadores | Separar los modelos internos de los datos de entrada y salida. |
+| Serilog | Registrar operaciones y errores de la API. |
+| Data Annotations / FluentValidation | Validaciones por valorar durante la implementación. |
+| Bruno | Comprobación incremental de endpoints y pruebas funcionales al final. |
 
-> Las ramas `v-Sql` y `v-Mongo` se desarrollan de forma secuencial: la segunda se creará **a partir de la primera cuando esté terminada**. Cada una tendrá su propio README con el alcance y las instrucciones correspondientes.
+## Organización del código (propuesta inicial)
 
-## Parte 1: SQL
+```text
+FunkoApp/
+├── Controllers/
+│   ├── FunkosController.cs
+│   └── CategoriasController.cs
+├── Models/
+├── Factory/
+│   └── Seed/
+├── Dtos/
+├── Mappers/
+├── Repositories/
+├── Services/
+├── Errors/
+├── Infrastructures/
+├── Validators/          # Si se incorporan validadores propios
+├── Program.cs
+└── appsettings.json
+```
 
-- CRUD de Funkos: consultar, crear, actualizar y eliminar.
-- Consulta de categorías: listar y obtener por identificador.
-- Categorías precargadas mediante semillas (*seed data*).
-- Relación **uno a muchos**: una categoría puede tener muchos Funkos y cada Funko pertenece a una categoría.
-- Persistencia con **Entity Framework Core y PostgreSQL**, mediante Fluent API y migraciones.
-- Borrado lógico de Funkos con `IsDeleted`.
+La estructura se ajustará cuando se creen los archivos, tomando como referencia la organización de la API de ejemplo del profesor.
 
-## Parte 2: MongoDB
 
-Se reutilizará y refactorizará la API de la primera parte:
+## Ejecución y pruebas
 
-- CRUD de Funkos y consultas de categorías y proveedores.
-- Categoría **embebida** en el documento Funko.
-- Proveedor **referenciado** desde Funko; proveedores precargados por semillas.
-- Dos implementaciones del repositorio MongoDB: **driver nativo** y **Entity Framework Core**.
-- Selección de la implementación mediante `appsettings.json` e inyección de dependencias.
+Las instrucciones concretas de arranque, configuración de la base de datos, migraciones y pruebas se incorporarán **cuando la implementación esté disponible y verificada**. No se documentan comandos de arranque como si ya se hubieran probado.
 
-## Enfoque técnico
 
-El proyecto seguirá el contenido trabajado **hasta el tema 12** y las ampliaciones indicadas por el profesor. Se utilizarán controladores MVC, servicios, repositorios, DTOs, mapeadores, inyección de dependencias, gestión de errores y configuración externa.
+## Evolución posterior
 
-Tecnologías y patrones previstos:
-
-- **.NET 10 / C# 14** y **ASP.NET Core Web API**.
-- **Scrutor** para el registro de servicios mediante inyección de dependencias.
-- **CSharpFunctionalExtensions** con `Result` para gestionar errores de negocio (patrón ROP).
-- **Fluent API** para configurar el modelo SQL de EF Core.
-- **Serilog** para registros de la aplicación.
-- **Data Annotations** y **FluentValidation**: incorporación por decidir durante el desarrollo.
-- Pruebas de endpoints durante la implementación y pruebas funcionales finales con **Bruno**.
-
-> Esta lista describe el **alcance previsto**, no funcionalidades ya implementadas.
+Una vez terminada y comprobada esta parte, se creará la rama `parte-2-mongo` **a partir de `parte-1-sql`**. Allí se refactorizará la persistencia para MongoDB, con categorías embebidas, proveedores referenciados y selección entre el driver nativo y EF Core desde la configuración.
