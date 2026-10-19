@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="FunkoPopApiSql.Test/FunkoPopApiSql.Test.csproj" />
+  <Project Path="FunkoPopApiSql/FunkoPopApiSql.csproj" />
+</Solution>
