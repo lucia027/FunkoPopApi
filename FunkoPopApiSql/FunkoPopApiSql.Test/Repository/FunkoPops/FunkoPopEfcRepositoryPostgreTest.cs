@@ -5,7 +5,7 @@ using FunkoPopApiSql.Repository.FunkoPops;
 using Microsoft.EntityFrameworkCore;
 using Testcontainers.PostgreSql;
 
-namespace FunkoPopApiSql.Test.Integration.Repositories;
+namespace FunkoPopApiSql.Test.Repository.FunkoPops;
 
 [TestFixture]
 [Category("Integration")]
@@ -54,8 +54,8 @@ public class FunkoPopEfcRepositoryPostgreTest {
         await _container.DisposeAsync();
     }
 
-    private async Task<Categoria> CrearCategoriaAsync(string nombre = "Anime") {
-        var categoria = new Categoria {
+    private async Task<FunkoPopApiSql.Models.Categoria> CrearCategoriaAsync(string nombre = "Anime") {
+        var categoria = new FunkoPopApiSql.Models.Categoria {
             Nombre = nombre,
             CreatedAt = DateTime.UtcNow
         };
